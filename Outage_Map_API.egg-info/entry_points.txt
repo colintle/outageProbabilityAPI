@@ -1,0 +1,2 @@
+[console_scripts]
+outage-map = api.main:cli
