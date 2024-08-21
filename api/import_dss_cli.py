@@ -19,7 +19,7 @@ def IMPORT_DSS():
 @click.option('--input-path', type=click.Path(exists=True), required=True,
               help="Relative path to the input directory containing the DSS files.")
 @click.option('--output-path', type=click.Path(), required=True,
-              help="Directory where the nodeList and edgeList CSV files will be saved.")
+              help="Directory where the nodeList & edgeList CSV files will be saved.")
 def import_dss(input_path, output_path):
     """Process DSS files and save nodeList and edgeList as CSV files."""
     
@@ -68,7 +68,9 @@ def import_dss(input_path, output_path):
 
     # Loop through bus list
     for i, bus in enumerate(BUSES):
+        # NODES.append(Node(bus.name, i, bus.coordinates, elevation=getElevationByCoords(bus.coordinates), vegetation=getLandCover(bus.coordinates)))
         NODES.append(Node(bus.name, i, bus.coordinates, elevation=getElevationByCoords(bus.coordinates), vegetation=None))
+
 
     # Loop through lines
     for line in LINES:
@@ -91,13 +93,14 @@ def import_dss(input_path, output_path):
             'name': node.name,
             'coords': node.coords,
             'elevation': node.elevation,
-            'vegetation': node.vegetation
+            # 'vegetation': node.vegetation
         })
 
     # Loop through edges
     for i, edge in enumerate(EDGES):
         if edge.enabled == 1:
-            G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, vegetation=None)
+            # G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, vegetation=findAvgLineVegetation(edge.bus1, edge.bus2, NODES,10))
+            G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length)
 
     # Convert Edge List and Node List to Panda Dataframes
     el = nx.to_pandas_edgelist(G)

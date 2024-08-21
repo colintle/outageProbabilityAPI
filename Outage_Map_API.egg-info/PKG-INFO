@@ -12,6 +12,7 @@ Requires-Dist: async-timeout==4.0.3
 Requires-Dist: attrs==23.2.0
 Requires-Dist: branca==0.7.2
 Requires-Dist: brotli==1.1.0
+Requires-Dist: beautifulsoup4==4.12.3
 Requires-Dist: cattrs==23.2.3
 Requires-Dist: certifi==2024.6.2
 Requires-Dist: cffi==1.16.0
@@ -33,6 +34,7 @@ Requires-Dist: folium==0.17.0
 Requires-Dist: fonttools==4.53.0
 Requires-Dist: frozenlist==1.4.1
 Requires-Dist: geopandas==0.14.4
+Requires-Dist: geopy==2.4.1
 Requires-Dist: h5netcdf==1.3.0
 Requires-Dist: h5py==3.11.0
 Requires-Dist: hydrosignatures==0.16.0
