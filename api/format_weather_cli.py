@@ -16,7 +16,7 @@ def FORMAT_WEATHER():
 @click.option('--nodelist', type=click.Path(exists=True), required=True, help='Path to the CSV file containing the nodelist.')
 @click.option('--edgelist', type=click.Path(exists=True), required=True, help='Path to the CSV file containing the edgelist.')
 @click.option('--output-path', type=click.Path(), required=True, help='Relative output path to save the results.')
-@click.option('--features', type=click.Choice(['temp', 'dwpt', 'rhum', 'prcp', 'snow', 'wdir', 'wspd', 'wpgt', 'pres', 'tsun', 'coco'], case_sensitive=False), multiple=True, required=True, help='Weather features to process.')
+@click.option('--features', type=click.Choice(['temp', 'dwpt', 'rhum', 'prcp', 'snow', 'wdir', 'wspd', 'wpgt', 'pres', 'tsun', 'coco'], case_sensitive=True), multiple=True, required=True, help='Weather features to process.')
 def format_weather(events_file, nodelist, edgelist, output_path, features):
     """Based on weather events, find the weather features occurred at each node and edge in network."""
     
