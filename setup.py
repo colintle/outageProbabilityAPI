@@ -52,6 +52,7 @@ setup(
         'lxml==5.2.2',
         'markupsafe==2.1.5',
         'matplotlib==3.9.0',
+        'meteostat==1.6.8',
         'multidict==6.0.5',
         'netcdf4==1.7.1',
         'networkx==3.2.1',

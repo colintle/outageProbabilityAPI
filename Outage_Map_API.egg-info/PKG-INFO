@@ -48,6 +48,7 @@ Requires-Dist: kiwisolver==1.4.5
 Requires-Dist: lxml==5.2.2
 Requires-Dist: markupsafe==2.1.5
 Requires-Dist: matplotlib==3.9.0
+Requires-Dist: meteostat==1.6.8
 Requires-Dist: multidict==6.0.5
 Requires-Dist: netcdf4==1.7.1
 Requires-Dist: networkx==3.2.1

@@ -1,4 +1,3 @@
-import re
 import pynldas2 as nldas
 import pygeohydro as gh
 import py3dep
@@ -6,6 +5,7 @@ import numpy as np
 from math import radians, sin, cos, sqrt, atan2, degrees
 from datetime import datetime
 import math
+from meteostat import Hourly, Point
 
 
 def find_node_by_name(connections, target):
@@ -96,9 +96,9 @@ def getWeatherByCoords(lon,lat,start,end):
     Returns:
     data (dict): Dictionary corresponding to the hour climatology data associated with the data and location
     """
-
-    data =nldas.get_bycoords(list(zip([lon],[lat])),start,end) 
-    return data
+    coord = Point(lat, lon)
+    data = Hourly(coord, start, end)
+    return data.fetch()
 
 def getLandCover(coords):
     """
@@ -203,7 +203,7 @@ def parseDate(date):
     Parses a datetime string into a date string.
 
     Args:
-        date (str): A string representing a datetime in the format '%Y-%m-%d %H:%M:%S'.
+        date (str): A string representing a datetime in the format '%m/%d/%Y'.
 
     Returns:
         str: A string representing the date extracted from the input datetime string
@@ -213,7 +213,7 @@ def parseDate(date):
         ValueError: If the input date string is not in the expected format or cannot be parsed.
 
     """
-    datetime_obj = datetime.strptime(str(date), '%Y-%m-%d %H:%M:%S')
+    datetime_obj = datetime.strptime(str(date), '%m/%d/%Y')
 
     date_str = datetime_obj.strftime('%Y-%m-%d')
 
