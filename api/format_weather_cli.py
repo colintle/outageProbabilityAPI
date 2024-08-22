@@ -78,7 +78,8 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
         # Convert Lists to dataframes and save to corresponding directories
         for feature in features:
             events_df = pd.DataFrame(event_data.get(feature))
-            events_df.to_csv(os.path.join(node_dirs[feature], f'weatherEvent{j+1}.csv'), index=True)
+            events_df.reset_index(drop=True, inplace=True)
+            events_df.to_csv(os.path.join(node_dirs[feature], f'weatherEvent{j+1}.csv'), index=False)
 
     ###############################################################
                 # EDGE WEATHER DATA COLLECTION LOOP
@@ -99,7 +100,6 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
         # Load data for each feature and calculate the edge data
         for feature in features:
             feature_df = pd.read_csv(os.path.join(node_dirs[feature], name))
-            feature_df.drop(["Unnamed: 0"], axis=1, inplace=True)
 
             for source, target in edgeList:
                 edge_values = (feature_df.iloc[[source]].values + feature_df.iloc[[target]].values) / 2
@@ -110,7 +110,7 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
             events_df = pd.DataFrame(edge_data.get(feature))
             if feature in events_df.columns:
                 events_df = events_df.drop(columns=[feature])
-            events_df.to_csv(os.path.join(edge_dirs.get(feature), name))
+            events_df.to_csv(os.path.join(edge_dirs.get(feature), name), index=False)
 
 if __name__ == "__main__":
     FORMAT_WEATHER()
