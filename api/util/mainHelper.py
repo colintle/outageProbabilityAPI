@@ -255,10 +255,8 @@ def probOfNodeAndParent(probN, probE, graph):
     queue.append(0)
     # Continue until there are no more nodes to process
     while queue:
-        #print(queue)
         # Retrieve the next node to process from the queue
         parent = queue.popleft()
-        print(parent)
         # Iterate over all children connected to the current parent node
         for child, edge in graph[parent]:
             # Update the probability range for each child node
