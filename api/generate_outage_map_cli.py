@@ -146,6 +146,10 @@ def generate_outage_map(node_feature, edge_feature, list_folder, wi_folder):
     # Set positions for nodes based on their coordinates
     pos = {i: eval(nodes.iloc[[i]]["coords"][i]) for i in range(len(nodes))}
 
+    nodes["Probability"] = meanProb
+    nodes.to_csv(os.path.join(list_folder, 'nodeList.csv'), index=False)
+
+
     # Plot the graph with probabilities
     plotTreeWithProb(G, meanProb, "", pos)
 
