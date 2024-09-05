@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='Outage Map API',
     version='0.1.0',
-    py_modules=['api'],
+    py_modules=['outage_map'],
     install_requires=[
         'Click==8.1.7',
         'affine==2.4.0',
@@ -98,7 +98,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'outage-map = api.main:cli',
+            'outage-map = outage_map.main:cli',
         ],
     },
 )
