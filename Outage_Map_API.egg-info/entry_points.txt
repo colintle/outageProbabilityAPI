@@ -1,2 +1,2 @@
 [console_scripts]
-outage-map = api.main:cli
+outage-map = outage_map.main:cli
