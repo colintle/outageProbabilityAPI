@@ -100,5 +100,8 @@ setup(
         'console_scripts': [
             'outage-map = outage_map.main:cli',
         ],
+        "gui_scripts": [
+            "outage-map-gui = outage_map_gui.app:main",
+        ]
     },
 )
