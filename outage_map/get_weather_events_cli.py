@@ -98,8 +98,8 @@ def fetch_counties_for_state(state):
     for option in options:
         value = option['value']
         name = option.text.strip()
-        if value != "ALL":  # Skip the "-- All --" option
-            counties[name.upper()] = odd  # Map county name to its index
+        if value != "ALL":
+            counties[name.upper()] = odd
             odd += 2
     return counties
 
@@ -111,7 +111,7 @@ def GET_WEATHER_EVENTS():
     pass
 
 @GET_WEATHER_EVENTS.command()
-@click.option('--state', type=click.Choice(list(state_fips.keys())), required=True,
+@click.option('--state', type=click.Choice(list(state_fips.keys())), required=False,
               help="State for which to retrieve weather events.")
 @click.option('--events', type=click.Choice(events), multiple=True, required=True,
               help="One or more weather events to filter by.")
@@ -128,19 +128,12 @@ def GET_WEATHER_EVENTS():
 def get_weather_events(state, events, nodelist, county, start_date, end_date, output_path):
     """Retrieve weather events for a specified state, events, and date range, 
     and save the result as a CSV file."""
-    
-    if not nodelist and not county:
-        raise click.BadParameter("You must provide either a --nodelist or --county.")
 
-    # Prioritize county if both are provided
-    if county:
-        counties = fetch_counties_for_state(state)
-        if county.upper() not in counties:
-            raise click.BadParameter(f"County '{county}' not found in the state of {state}.")
-        county_index = counties[county.upper()]
-        county_formatted = f"{county.upper()}%3A{county_index}"
-    else:
-        # Load the nodelist CSV and calculate average lat/lon if county is not provided
+    if not nodelist and not (state and county):
+        raise click.BadParameter("You must provide either a --nodelist or both --state and --county options.")
+
+    if nodelist:
+        # Load the nodelist CSV and calculate average lat/lon
         data = pd.read_csv(nodelist)
         lo = 0
         la = 0
@@ -153,9 +146,29 @@ def get_weather_events(state, events, nodelist, county, start_date, end_date, ou
         avg_lon = lo / len(data.index)
         
         county = get_county(avg_lat, avg_lon).upper()
+
+        geolocator = Nominatim(user_agent="state_finder")
+        location = geolocator.reverse((avg_lat, avg_lon), exactly_one=True)
+        state = location.raw['address'].get('state', None)
+
+        if not state or state not in state_fips:
+            raise click.BadParameter(f"State not found for the coordinates {avg_lat}, {avg_lon}")
+        
         counties = fetch_counties_for_state(state)
-        county_index = counties.get(county, "1")  # Default to "1" if county not found
-        county_formatted = f"{county}%3A{county_index}"
+        if county.upper() not in counties:
+            raise click.BadParameter(f"County '{county}' not found in the state of {state}.")
+        county_index = counties[county.upper()]
+        county_formatted = f"{county.upper()}%3A{county_index}"
+    else:
+        if state not in state_fips:
+            raise click.BadParameter(f"State '{state}' not found.")
+        
+        counties = fetch_counties_for_state(state)
+        if county.upper() not in counties:
+            raise click.BadParameter(f"County '{county}' not found in the state of {state}.")
+        
+        county_index = counties[county.upper()]
+        county_formatted = f"{county.upper()}%3A{county_index}"
 
     state_fips_code = state_fips[state]
     events = [f"(Z) {event}" for event in events]
