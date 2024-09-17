@@ -68,8 +68,8 @@ def import_dss(input_path, output_path):
 
     # Loop through bus list
     for i, bus in enumerate(BUSES):
-        # NODES.append(Node(bus.name, i, bus.coordinates, elevation=getElevationByCoords(bus.coordinates), vegetation=getLandCover(bus.coordinates)))
-        NODES.append(Node(bus.name, i, bus.coordinates, elevation=getElevationByCoords(bus.coordinates), vegetation=None))
+        NODES.append(Node(bus.name, i, bus.coordinates, elevation=getElevationByCoords(bus.coordinates), vegetation=getLandCover(bus.coordinates)))
+        # NODES.append(Node(bus.name, i, bus.coordinates, elevation=getElevationByCoords(bus.coordinates), vegetation=None))
 
 
     # Loop through lines
@@ -93,14 +93,14 @@ def import_dss(input_path, output_path):
             'name': node.name,
             'coords': node.coords,
             'elevation': node.elevation,
-            # 'vegetation': node.vegetation
+            'vegetation': node.vegetation
         })
 
     # Loop through edges
     for i, edge in enumerate(EDGES):
         if edge.enabled == 1:
-            # G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, vegetation=findAvgLineVegetation(edge.bus1, edge.bus2, NODES,10))
-            G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length)
+            G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, vegetation=findAvgLineVegetation(edge.bus1, edge.bus2, NODES,10))
+            # G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length)
 
     # Convert Edge List and Node List to Panda Dataframes
     el = nx.to_pandas_edgelist(G)
