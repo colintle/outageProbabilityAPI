@@ -9,11 +9,41 @@ def GENERATE_WEATHER_IMPACT():
     """CLI group for generating weather impact."""
     pass
 
+# Custom validation function for node-feature and edge-feature
+def validate_feature_values(ctx, param, value):
+    """
+    Validates that each feature has the correct number of float values, 
+    and that the float values sum to 1.
+    """
+    try:
+        feature_list = ctx.params['feature_list']  # Get the feature list
+        num_features = len(feature_list)  # Number of features
+
+        # Parse the feature, ensuring each has the correct number of floats
+        parsed_values = []
+        for feature in value:
+            parts = feature.split(",")
+            feature_name = parts[0]  # First part is the feature name
+            values = [float(v) for v in parts[1:]]  # The remaining parts are the float values
+
+            if len(values) != num_features:
+                raise click.BadParameter(f"Each feature must have exactly {num_features} values.")
+            
+            if not abs(sum(values) - 1.0) < 1e-6:
+                raise click.BadParameter(f"Values for {feature_name} must sum to 1. Provided values sum to {sum(values)}.")
+            
+            parsed_values.append((feature_name, values))
+        return parsed_values
+
+    except ValueError as e:
+        raise click.BadParameter(f"Invalid input: {str(e)}")
+
+# CLI command
 @GENERATE_WEATHER_IMPACT.command()
 @click.option('--feature-list', type=(str, int, int), multiple=True, required=True, help='List of features with min and max values. Example: --feature-list temp 0 100 --feature-list prcp 0 10')
 @click.option('--input-path', type=click.Path(exists=True), required=True, help='Input relative path to the folder containing feature folders.')
-@click.option('--node-feature', type=(str, float, float), multiple=True, required=True, help='Node feature with relative values. Example: --node-feature elevation 0.5 0.5')
-@click.option('--edge-feature', type=(str, float, float), multiple=True, required=True, help='Edge feature with relative values. Example: --edge-feature elevation 0.7 0.3')
+@click.option('--node-feature', multiple=True, required=True, callback=validate_feature_values, help='Node feature with relative values. Example: --node-feature "elevation 0.5 0.5"')
+@click.option('--edge-feature', multiple=True, required=True, callback=validate_feature_values, help='Edge feature with relative values. Example: --edge-feature "elevation 0.7 0.3"')
 @click.option('--output-path', type=click.Path(), required=True, help='Output directory to save the results.')
 def generate_weather_impact(feature_list, input_path, node_feature, edge_feature, output_path):
     """Generate weather impact based on input features, node and edge data."""
@@ -31,21 +61,6 @@ def generate_weather_impact(feature_list, input_path, node_feature, edge_feature
     if not os.path.exists(edges_output_path):
         os.makedirs(edges_output_path)
 
-    # Ensure the number of node/edge feature values matches the number of features in feature-list
-    num_features = len(feature_list)
-
-    for _, *values in node_feature:
-        if len(values) != num_features:
-            raise ValueError(f"Each node feature must have {num_features} values.")
-        if not abs(sum(values) - 1.0) < 1e-6:
-            raise ValueError(f"Values for node feature must sum to 1. Provided values sum to {sum(values)}.")
-
-    for _, *values in edge_feature:
-        if len(values) != num_features:
-            raise ValueError(f"Each edge feature must have {num_features} values.")
-        if not abs(sum(values) - 1.0) < 1e-6:
-            raise ValueError(f"Values for edge feature must sum to 1. Provided values sum to {sum(values)}.")
-
     # Dynamically determine directories and severity levels based on feature list
     node_directories = []
     edge_directories = []
@@ -59,7 +74,9 @@ def generate_weather_impact(feature_list, input_path, node_feature, edge_feature
     file_names = [f for f in os.listdir(node_directories[0]) if os.path.isfile(os.path.join(node_directories[0], f))]
     
     for name in file_names:
-        alpha = {feature[0]: feature[1:] for feature in node_feature}
+        # alpha = {feature_name: float(values) for feature_name, values in node_feature}
+        alpha = {feature_name: values for feature_name, values in node_feature}
+
 
         # Dynamically read data based on the feature
         data_frames = {}
@@ -94,7 +111,7 @@ def generate_weather_impact(feature_list, input_path, node_feature, edge_feature
         wi1 = weatherImpact(alpha, weather_vector[:, :, 0])
         wi2 = weatherImpact(alpha, weather_vector[:, :, 1])
 
-        wi = {feature[0]: [] for feature in node_feature}
+        wi = {feature_name: [] for feature_name in alpha}
 
         for feature in wi:
             for low, high in zip(wi1[feature], wi2[feature]):
@@ -107,7 +124,9 @@ def generate_weather_impact(feature_list, input_path, node_feature, edge_feature
     edge_file_names = [f for f in os.listdir(edge_directories[0]) if os.path.isfile(os.path.join(edge_directories[0], f))]
     
     for name in edge_file_names:
-        alpha = {feature[0]: feature[1:] for feature in edge_feature}
+        # alpha = {feature_name: float(values) for feature_name, values in edge_feature}
+        alpha = {feature_name: values for feature_name, values in edge_feature}
+
 
         # Dynamically read data based on the feature
         edge_data_frames = {}
@@ -120,7 +139,6 @@ def generate_weather_impact(feature_list, input_path, node_feature, edge_feature
         # Initialize arrays to store scores and vectors for edges
         edge_weather_vector = np.zeros((len(feature_list), LENGTH, 2))
         edge_scores = {feature[0]: np.zeros((2, LENGTH)) for feature in feature_list}
-
 
         # Loop through each edge to find the normalized weather value
         for i in range(LENGTH):
@@ -143,7 +161,7 @@ def generate_weather_impact(feature_list, input_path, node_feature, edge_feature
         edge_wi1 = weatherImpact(alpha, edge_weather_vector[:, :, 0])
         edge_wi2 = weatherImpact(alpha, edge_weather_vector[:, :, 1])
 
-        edge_wi = {feature[0]: [] for feature in edge_feature}
+        edge_wi = {feature_name: [] for feature_name in alpha}
 
         for feature in edge_wi:
             for low, high in zip(edge_wi1[feature], edge_wi2[feature]):

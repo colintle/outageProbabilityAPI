@@ -3,7 +3,7 @@ import pygeohydro as gh
 import py3dep
 import numpy as np
 from math import radians, sin, cos, sqrt, atan2, degrees
-from datetime import datetime
+from datetime import datetime, timedelta
 import math
 from meteostat import Hourly, Point
 
@@ -236,6 +236,14 @@ def parseTime(time):
     if len(time) != 4:
         time = ("0" * (4 - len(time))) + time
     return time
+
+def adjust_2400_to_next_day(date_str, time_str):
+    """If time is 2400, adjust it to 0000 and move the date to the next day."""
+    if time_str == "2400":
+        time_str = "0000"
+        date = datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=1)
+        date_str = date.strftime("%Y-%m-%d")
+    return date_str, time_str
 
 def nodeNameSplit(text):
     """

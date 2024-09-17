@@ -2,7 +2,7 @@ import click
 import os
 import pandas as pd
 import warnings
-from .util.NetworkFunctions import getWeatherByCoords, roundup, parseDate, parseTime
+from .util.NetworkFunctions import getWeatherByCoords, roundup, parseDate, parseTime, adjust_2400_to_next_day
 from datetime import datetime
 
 warnings.filterwarnings("ignore")
@@ -52,11 +52,14 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
     # Loop through weather events
     for j in weatherEvents.index:
         # Determine start and end date of event 
-        begin = f"{parseDate(weatherEvents['BEGIN_DATE'][j])} {parseTime(roundup(weatherEvents['BEGIN_TIME'][j]))}"
-        end = f"{parseDate(weatherEvents['END_DATE'][j])} {parseTime(roundup(weatherEvents['END_TIME'][j]))}"
+        begin_date, begin_time = parseDate(weatherEvents['BEGIN_DATE'][j]), parseTime(roundup(weatherEvents['BEGIN_TIME'][j]))
+        end_date, end_time = parseDate(weatherEvents['END_DATE'][j]), parseTime(roundup(weatherEvents['END_TIME'][j]))
         
-        start = datetime.strptime(begin, "%Y-%m-%d %H%M")
-        end = datetime.strptime(end, "%Y-%m-%d %H%M")
+        begin_date, begin_time = adjust_2400_to_next_day(begin_date, begin_time)
+        end_date, end_time = adjust_2400_to_next_day(end_date, end_time)
+
+        start = datetime.strptime(f"{begin_date} {begin_time}", "%Y-%m-%d %H%M")
+        end = datetime.strptime(f"{end_date} {end_time}", "%Y-%m-%d %H%M")
         
         # Initialize Node Event Lists for each feature
         event_data = {feature: [] for feature in features}
