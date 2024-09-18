@@ -93,6 +93,14 @@ def create_tab2(notebook):
 
     _, scrollable_frame = create_scrollable_frame(tab2)
 
+    event_label = tk.Label(scrollable_frame, text="Select Event Types (required):")
+    event_label.pack(pady=5)
+
+    event_listbox = tk.Listbox(scrollable_frame, selectmode="multiple", height=8)
+    for event in events:
+        event_listbox.insert(tk.END, event)
+    event_listbox.pack(pady=5)
+
     state_label = tk.Label(scrollable_frame, text="Select State (optional):")
     state_label.pack(pady=5)
 
@@ -101,13 +109,11 @@ def create_tab2(notebook):
     state_var.set("None")
     state_dropdown.pack(pady=5)
 
-    event_label = tk.Label(scrollable_frame, text="Select Event Types (required):")
-    event_label.pack(pady=5)
+    county_label = tk.Label(scrollable_frame, text="Enter County (optional):")
+    county_label.pack(pady=5)
 
-    event_listbox = tk.Listbox(scrollable_frame, selectmode="multiple", height=8)
-    for event in events:
-        event_listbox.insert(tk.END, event)
-    event_listbox.pack(pady=5)
+    county_entry = tk.Entry(scrollable_frame, width=50)
+    county_entry.pack(pady=5)
 
     nodelist_label = tk.Label(scrollable_frame, text="Select Nodelist (optional):")
     nodelist_label.pack(pady=5)
@@ -117,12 +123,6 @@ def create_tab2(notebook):
 
     nodelist_button = tk.Button(scrollable_frame, text="Browse", command=lambda: select_nodelist_file(nodelist_entry))
     nodelist_button.pack(pady=5)
-
-    county_label = tk.Label(scrollable_frame, text="Enter County (optional):")
-    county_label.pack(pady=5)
-
-    county_entry = tk.Entry(scrollable_frame, width=50)
-    county_entry.pack(pady=5)
 
     start_date_label = tk.Label(scrollable_frame, text="Start Date (YYYY-MM-DD, required):")
     start_date_label.pack(pady=5)
