@@ -81,6 +81,7 @@ Requires-Dist: scipy==1.13.1
 Requires-Dist: shapely==2.0.4
 Requires-Dist: six==1.16.0
 Requires-Dist: snuggs==1.4.7
+Requires-Dist: tkcalendar==1.6.1
 Requires-Dist: toolz==0.12.1
 Requires-Dist: typing-extensions==4.12.2
 Requires-Dist: tzdata==2024.1

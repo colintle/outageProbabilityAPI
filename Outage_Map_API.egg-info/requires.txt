@@ -78,6 +78,7 @@ scipy==1.13.1
 shapely==2.0.4
 six==1.16.0
 snuggs==1.4.7
+tkcalendar==1.6.1
 toolz==0.12.1
 typing-extensions==4.12.2
 tzdata==2024.1

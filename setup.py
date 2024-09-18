@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='Outage Map API',
     version='0.1.0',
-    py_modules=['outage_map'],
+    py_modules=['outage_map', 'outage_map_gui'],
     install_requires=[
         'Click==8.1.7',
         'affine==2.4.0',
@@ -85,6 +85,7 @@ setup(
         'shapely==2.0.4',
         'six==1.16.0',
         'snuggs==1.4.7',
+        'tkcalendar==1.6.1',
         'toolz==0.12.1',
         'typing-extensions==4.12.2',
         'tzdata==2024.1',
