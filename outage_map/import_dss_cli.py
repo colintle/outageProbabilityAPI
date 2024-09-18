@@ -7,6 +7,9 @@ from .util.NetworkFunctions import getElevationByCoords, fixBusName, findNodeNum
 from .util.ComponentClasses import Bus, Line, Load, Node, Edge, Transformer
 import warnings
 
+
+OFFSET = 0.000001
+
 warnings.filterwarnings("ignore")
 
 @click.group(
@@ -31,7 +34,8 @@ def import_dss(input_path, output_path):
     lines = dss.Lines.AllNames()
     elements = dss.Circuit.AllElementNames()
     transformers  = [item for item in elements if 'Transformer' in item]
-    loads = [item for item in elements if 'Load' in item] 
+    loads = [item for item in elements if 'Load' in item]
+    used_coords = set()
 
     # Initialize empty list for circuit and graph components
     BUSES = []
@@ -68,8 +72,20 @@ def import_dss(input_path, output_path):
 
     # Loop through bus list
     for i, bus in enumerate(BUSES):
-        NODES.append(Node(bus.name, i, bus.coordinates, elevation=getElevationByCoords(bus.coordinates), vegetation=getLandCover(bus.coordinates)))
-        # NODES.append(Node(bus.name, i, bus.coordinates, elevation=getElevationByCoords(bus.coordinates), vegetation=None))
+        lon, lat = bus.coordinates  # Extract coordinates
+
+        # Check if the coordinates already exist in the set
+        while (lon, lat) in used_coords:
+            lon += OFFSET  # Offset the longitude
+            lat += OFFSET  # Offset the latitude
+
+        # Add the new coordinates to the set
+        used_coords.add((lon, lat))
+
+        # Append the node with adjusted coordinates
+        NODES.append(Node(bus.name, i, (lon, lat), 
+                        elevation=getElevationByCoords((lon, lat)), 
+                        vegetation=getLandCover((lon, lat))))
 
 
     # Loop through lines
