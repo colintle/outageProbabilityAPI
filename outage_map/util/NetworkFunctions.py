@@ -1,8 +1,9 @@
-import pynldas2 as nldas
 import pygeohydro as gh
 import py3dep
 import numpy as np
 from math import radians, sin, cos, sqrt, atan2, degrees
+from pyproj import Geod
+from shapely.geometry import box
 from datetime import datetime, timedelta
 import math
 from meteostat import Hourly, Point
@@ -100,7 +101,7 @@ def getWeatherByCoords(lon,lat,start,end):
     data = Hourly(coord, start, end)
     return data.fetch()
 
-def getLandCover(coords):
+def getTreeCanopy(coords):
     """
     Grabs the tree canopy coverage (in year 2016) at the specified longitude and latitude.
 
@@ -122,6 +123,29 @@ def getLandCover(coords):
 
     # Return the land usage and cover data
     return tcc
+
+def getLandCover(coords, year=2019):
+    """
+    Retrieves the land cover data at the specified longitude and latitude using NLCD.
+
+    Args:
+    coords (tuple): Longitude and latitude of the desired location.
+    year (int): The year for which the land cover data is required (default is 2019).
+
+    Returns:
+    land_cover_value (int): Value corresponding to the land cover classification in that area.
+    """
+    # Extract latitude and longitude from coords
+    lon, lat = coords
+
+    # Fetch NLCD land cover data for the specified coordinates and yeara
+    land_usage_land_cover = gh.nlcd_bycoords(list(zip([lon], [lat])), years={"cover": [year]})
+
+    # Extract the land cover value for the given year
+    land_cover_value = land_usage_land_cover.cover_2019[0]
+
+    # Return the land cover classification
+    return land_cover_value
 
 def getElevationByCoords(coords):
    """
@@ -168,6 +192,42 @@ def findEdgeElevation(bus1,bus2, nodes):
     edgeElevation = getElevationByCoords(tuple(res))
     
     return edgeElevation
+
+def generateDem(lat, lon):
+    lon_min, lat_min = min(lon), min(lat)
+    lon_max, lat_max = max(lon), max(lat)
+
+    if lat_min == lat_max:
+        lat_max += 0.000001
+
+    if lon_min == lon_max:
+        lon_max += 0.000001
+
+    geom = box(lon_min, lat_min, lon_max, lat_max)
+
+    dem = py3dep.get_map("DEM", geom, resolution=30, geo_crs=4326)
+
+    return dem
+
+def findSlopeOfElevation(dem, coords1, coords2):
+    lon1, lat1 = coords1
+    lon2, lat2 = coords2
+
+    def get_elevation(dem, coord):
+        lat, lon = coord
+        return dem.sel(x=lon, y=lat, method="nearest").values
+
+    elevation1 = get_elevation(dem, (lat1, lon1))
+    elevation2 = get_elevation(dem, (lat2, lon2))
+
+    delta_elevation = elevation2 - elevation1
+
+    geod = Geod(ellps="WGS84")
+    _, _, distance = geod.inv(lon1, lat1, lon2, lat2)
+
+    slope = (delta_elevation / distance)
+
+    return round(slope, 5)
     
 def roundup(x):
     """

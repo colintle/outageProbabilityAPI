@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import networkx as nx
 import opendssdirect as dss
-from .util.NetworkFunctions import getElevationByCoords, fixBusName, findNodeNum, getLandCover, findAvgLineVegetation
+from .util.NetworkFunctions import getElevationByCoords, fixBusName, findNodeNum, getLandCover, getTreeCanopy, findSlopeOfElevation, generateDem, findAvgLineVegetation
 from .util.ComponentClasses import Bus, Line, Load, Node, Edge, Transformer
 import warnings
 
@@ -36,6 +36,8 @@ def import_dss(input_path, output_path):
     transformers  = [item for item in elements if 'Transformer' in item]
     loads = [item for item in elements if 'Load' in item]
     used_coords = set()
+    lats = []
+    lons = []
 
     # Initialize empty list for circuit and graph components
     BUSES = []
@@ -81,11 +83,14 @@ def import_dss(input_path, output_path):
 
         # Add the new coordinates to the set
         used_coords.add((lon, lat))
+        lats.append(lat)
+        lons.append(lon)
 
         # Append the node with adjusted coordinates
         NODES.append(Node(bus.name, i, (lon, lat), 
-                        elevation=getElevationByCoords((lon, lat)), 
-                        vegetation=getLandCover((lon, lat))))
+                        elevation=getElevationByCoords((lon, lat)),
+                        cover=getLandCover((lon, lat)),
+                        vegetation=getTreeCanopy((lon, lat))))
 
 
     # Loop through lines
@@ -109,13 +114,19 @@ def import_dss(input_path, output_path):
             'name': node.name,
             'coords': node.coords,
             'elevation': node.elevation,
-            'vegetation': node.vegetation
+            'vegetation': node.vegetation,
+
         })
 
     # Loop through edges
+    dem = generateDem(lat=lats, lon=lons)
     for i, edge in enumerate(EDGES):
         if edge.enabled == 1:
-            G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, vegetation=findAvgLineVegetation(edge.bus1, edge.bus2, NODES,10))
+            coords1 = NODES[edge.bus1].coords
+            coords2 = NODES[edge.bus2].coords
+            print(coords1)
+            print(coords2)
+            G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, slope=findSlopeOfElevation(coords1=coords1, coords2=coords2, dem=dem), vegetation=findAvgLineVegetation(edge.bus1, edge.bus2, NODES,10))
             # G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length)
 
     # Convert Edge List and Node List to Panda Dataframes

@@ -69,7 +69,7 @@ class Transformer:
 
 # Node Class for Graph Neural Network
 class Node:
-    def __init__(self, name, num, coords, elevation=None, vegetation=None):
+    def __init__(self, name, num, coords, elevation=None, vegetation=None, cover=None):
         
         # Node name
         self.name = name
@@ -81,10 +81,11 @@ class Node:
 
         self.elevation = elevation
         self.vegetation = vegetation
+        self.cover = cover
 
 # Edge Class for Graph Neural Network
 class Edge:
-    def __init__(self, name, length, bus1, bus2, enabled, vegetation=None):
+    def __init__(self, name, length, bus1, bus2, enabled, vegetation=None, slope=None):
         
         # Name of Edge
         self.name = name
@@ -102,4 +103,6 @@ class Edge:
         self.enabled = enabled          # This will be 0 if no and 1 if yes'
 
         self.vegetation = vegetation
+
+        self.slope= slope
 
