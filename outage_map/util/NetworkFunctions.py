@@ -2,7 +2,9 @@ import pygeohydro as gh
 import py3dep
 import numpy as np
 from math import radians, sin, cos, sqrt, atan2, degrees
+from shapely.geometry import LineString
 from pyproj import Geod
+import geopandas as gpd
 from shapely.geometry import box
 from datetime import datetime, timedelta
 import math
@@ -106,46 +108,31 @@ def getTreeCanopy(coords):
     Grabs the tree canopy coverage (in year 2016) at the specified longitude and latitude.
 
     Args:
-    coords (tuple): Longitude, and Latitude of desired location.
+    coords List((tuple)): Longitude, and Latitude of desired location.
 
     Returns:
     tcc (float): Value corresponding to the tree canopy coverage in that area
     """
-    # Grab latitude and longitude from coords
-    lon = coords[0]
-    lat = coords[1]
     
     # OR get the data for specific coordinates using nlcd_bycoords (cover_statistics does not work with this method)
-    land_usage_land_cover = gh.nlcd_bycoords(list(zip([lon],[lat])), years={"canopy": [2019]})
-
-    # Grab the tree canopy coverage
-    tcc = land_usage_land_cover.canopy_2019[0]
-
-    # Return the land usage and cover data
-    return tcc
+    land_usage_land_cover = gh.nlcd_bycoords(coords, years={"canopy": [2019]})
+    return land_usage_land_cover.canopy_2019
 
 def getLandCover(coords, year=2019):
     """
     Retrieves the land cover data at the specified longitude and latitude using NLCD.
 
     Args:
-    coords (tuple): Longitude and latitude of the desired location.
+    coords List((tuple)): Longitude and latitude of the desired location.
     year (int): The year for which the land cover data is required (default is 2019).
 
     Returns:
     land_cover_value (int): Value corresponding to the land cover classification in that area.
     """
-    # Extract latitude and longitude from coords
-    lon, lat = coords
 
-    # Fetch NLCD land cover data for the specified coordinates and yeara
-    land_usage_land_cover = gh.nlcd_bycoords(list(zip([lon], [lat])), years={"cover": [year]})
-
-    # Extract the land cover value for the given year
-    land_cover_value = land_usage_land_cover.cover_2019[0]
-
-    # Return the land cover classification
-    return land_cover_value
+    # Fetch NLCD land cover data for the specified coordinates and year
+    land_usage_land_cover = gh.nlcd_bycoords(coords, years={"cover": [year]})
+    return land_usage_land_cover.cover_2019
 
 def getElevationByCoords(coords):
    """

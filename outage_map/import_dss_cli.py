@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import networkx as nx
 import opendssdirect as dss
-from .util.NetworkFunctions import getElevationByCoords, fixBusName, findNodeNum, getLandCover, getTreeCanopy, findSlopeOfElevation, generateDem, findAvgLineVegetation
+from .util.NetworkFunctions import getElevationByCoords, fixBusName, findNodeNum, getTreeCanopy, findSlopeOfElevation, generateDem, getLandCover
 from .util.ComponentClasses import Bus, Line, Load, Node, Edge, Transformer
 import warnings
 
@@ -65,49 +65,44 @@ def import_dss(input_path, output_path):
         newBusT = fixBusName(busesT)
         TRANSFORMERS.append(Transformer(dss.Element.Name(), newBusT[0], newBusT[1], dss.Transformers.WdgVoltages(), dss.Transformers.WdgCurrents()))
 
-    # Loop through loads
     for load in loads:
         dss.Circuit.SetActiveElement(load)
         lBus = dss.CktElement.BusNames()
         newBusL = fixBusName(lBus)
         LOADS.append(Load(dss.Loads.Name(), newBusL[0], dss.Loads.kV(), dss.Loads.kW(), dss.Loads.kvar(), dss.Loads.Vminpu(), dss.Loads.Vmaxpu(), dss.Loads.Phases()))
 
-    # Loop through bus list
     for i, bus in enumerate(BUSES):
-        lon, lat = bus.coordinates  # Extract coordinates
+        lon, lat = bus.coordinates
 
-        # Check if the coordinates already exist in the set
         while (lon, lat) in used_coords:
-            lon += OFFSET  # Offset the longitude
-            lat += OFFSET  # Offset the latitude
+            lon += OFFSET
+            lat += OFFSET
 
-        # Add the new coordinates to the set
         used_coords.add((lon, lat))
         lats.append(lat)
         lons.append(lon)
 
-        # Append the node with adjusted coordinates
-        NODES.append(Node(bus.name, i, (lon, lat), 
-                        elevation=getElevationByCoords((lon, lat)),
-                        cover=getLandCover((lon, lat)),
-                        vegetation=getTreeCanopy((lon, lat))))
+    coords = [(lon, lat) for lon, lat in zip(lons, lats)]
+    elevations = getElevationByCoords(coords)
+    covers = getLandCover(coords)
+    vegetations = getTreeCanopy(coords)
 
+    for i, bus in enumerate(BUSES):
+        NODES.append(Node(bus.name, i, coords[i], 
+                        elevation=elevations[i],
+                        cover=covers[i],
+                        vegetation=vegetations[i]))
 
-    # Loop through lines
     for line in LINES:
         EDGES.append(Edge(line.name, line.length, findNodeNum(line.bus1, NODES), findNodeNum(line.bus2, NODES), line.enabled))
 
-    # Loop through transformers
     for tf in TRANSFORMERS:
         EDGES.append(Edge(tf.name, 0, findNodeNum(tf.bus1, NODES), findNodeNum(tf.bus2, NODES), 1))
 
-    # Create a new graph
     G = nx.MultiDiGraph()
 
-    # Initialize a node dictionary to convert to csv
     nodeDict = []
 
-    # Loop through node list
     for node in NODES:
         G.add_node(node.num, name=node.name, coords=node.coords)
         nodeDict.append({
@@ -118,26 +113,20 @@ def import_dss(input_path, output_path):
 
         })
 
-    # Loop through edges
     dem = generateDem(lat=lats, lon=lons)
     for i, edge in enumerate(EDGES):
         if edge.enabled == 1:
             coords1 = NODES[edge.bus1].coords
             coords2 = NODES[edge.bus2].coords
-            print(coords1)
-            print(coords2)
-            G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, slope=findSlopeOfElevation(coords1=coords1, coords2=coords2, dem=dem), vegetation=findAvgLineVegetation(edge.bus1, edge.bus2, NODES,10))
-            # G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length)
+            avg_veg = (vegetations[edge.bus1] +  vegetations[edge.bus2]) / 2
+            G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, slope=findSlopeOfElevation(coords1=coords1, coords2=coords2, dem=dem), vegetation=avg_veg)
 
-    # Convert Edge List and Node List to Panda Dataframes
     el = nx.to_pandas_edgelist(G)
     nl = pd.DataFrame(nodeDict)
 
-    # Create output directory if it doesn't exist
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
-    # Save the dataframes as CSV files
     pd.DataFrame.to_csv(nl, os.path.join(output_path, 'nodeList.csv'))
     pd.DataFrame.to_csv(el, os.path.join(output_path, 'edgeList.csv'))
 
