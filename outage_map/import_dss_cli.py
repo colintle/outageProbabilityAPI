@@ -110,6 +110,7 @@ def import_dss(input_path, output_path):
             'coords': node.coords,
             'elevation': node.elevation,
             'vegetation': node.vegetation,
+            'cover': node.cover
 
         })
 
