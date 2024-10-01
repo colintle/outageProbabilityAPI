@@ -118,7 +118,7 @@ def getTreeCanopy(coords):
     land_usage_land_cover = gh.nlcd_bycoords(coords, years={"canopy": [2019]})
     return land_usage_land_cover.canopy_2019
 
-def getLandCover(coords, year=2019):
+def getLandCover(coords):
     """
     Retrieves the land cover data at the specified longitude and latitude using NLCD.
 
@@ -132,7 +132,7 @@ def getLandCover(coords, year=2019):
 
     # Fetch NLCD land cover data for the specified coordinates and year
     land_usage_land_cover = gh.nlcd_bycoords(coords, years={"cover": [year]})
-    return land_usage_land_cover.cover_2019
+    return land_usage_land_cover.cover_2021
 
 def getElevationByCoords(coords):
    """
