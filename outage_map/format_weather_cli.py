@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import warnings
 from .util.NetworkFunctions import getWeatherByCoords, roundup, parseDate, parseTime, adjust_2400_to_next_day
-from datetime import datetime
+from datetime import datetime, timedelta
 
 warnings.filterwarnings("ignore")
 
@@ -60,6 +60,12 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
 
         start = datetime.strptime(f"{begin_date} {begin_time}", "%Y-%m-%d %H%M")
         end = datetime.strptime(f"{end_date} {end_time}", "%Y-%m-%d %H%M")
+
+        time_difference = end - start
+
+        # Check if the difference is more than 1 hour
+        if time_difference <= timedelta(hours=1):
+            continue
         
         # Initialize Node Event Lists for each feature
         event_data = {feature: [] for feature in features}
@@ -76,7 +82,7 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
             
             # Append the data for each selected feature
             for feature in features:
-                event_data[feature].append(timeframe[feature])
+                    event_data[feature].append(timeframe[feature])
 
         # Convert Lists to dataframes and save to corresponding directories
         for feature in features:

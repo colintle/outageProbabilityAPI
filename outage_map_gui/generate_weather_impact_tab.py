@@ -202,7 +202,7 @@ def run_generate_weather_impact(feature_list_container, input_path, node_feature
 
     threading.Thread(target=process_files).start()
 
-def create_tab4(notebook):
+def create_tab5(notebook):
     tab4 = tk.Frame(notebook)
     notebook.add(tab4, text="Generate Weather Impact")
 

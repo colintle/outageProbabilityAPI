@@ -131,7 +131,7 @@ def getLandCover(coords):
     """
 
     # Fetch NLCD land cover data for the specified coordinates and year
-    land_usage_land_cover = gh.nlcd_bycoords(coords, years={"cover": [year]})
+    land_usage_land_cover = gh.nlcd_bycoords(coords, years={"cover": [2021]})
     return land_usage_land_cover.cover_2021
 
 def getElevationByCoords(coords):
@@ -433,3 +433,26 @@ def fixBusName(buses):
         newBus = bus.split('.')[0]
         newBuses.append(newBus)
     return newBuses
+
+def convertCoverToSeverity(value):
+    # Water
+    if value == 11:
+        return 1
+    # Developed
+    elif 21 <= value and value <= 24:
+        return 6
+    # Barren
+    elif value == 31:
+        return 3
+    # Forest
+    elif 41 <= value and value <= 43:
+        return 7
+    # Grass & Shrubs
+    elif 51 <= value and value <= 74:
+        return 4
+    # Farming
+    elif 81 <= value and value <= 82:
+        return 5
+    # Developed
+    else:
+        return 2

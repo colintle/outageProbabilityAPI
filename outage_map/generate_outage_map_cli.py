@@ -36,12 +36,18 @@ def GENERATE_OUTAGE_MAP():
     help='Input relative path to the folder containing nodeList.csv and edgeList.csv.'
 )
 @click.option(
+    '--weather-event',
+    type=str,
+    required=True,
+    help='Input weather event that contains the weather impact'
+)
+@click.option(
     '--wi-folder',
     type=click.Path(exists=True),
     required=True,
     help='Input relative path to the folder containing weather impacts. This folder should contain "edges" and "nodes" folders.'
 )
-def generate_outage_map(node_feature, edge_feature, list_folder, wi_folder):
+def generate_outage_map(node_feature, edge_feature, list_folder, weather_event, wi_folder):
     """
     Generate an outage map using specified node and edge features, and weather impacts.
     """
@@ -98,8 +104,8 @@ def generate_outage_map(node_feature, edge_feature, list_folder, wi_folder):
     meanRange_edges, stdRange_edges = createTables(stdWI_edges, meanWI_edges, numOfBins + 1)
 
     # Load weather impact data for nodes and edges
-    weatherImpactEdges = pd.read_csv(os.path.join(wi_folder, 'edges/weatherEvent1.csv'))
-    weatherImpactNodes = pd.read_csv(os.path.join(wi_folder, 'nodes/weatherEvent1.csv'))
+    weatherImpactEdges = pd.read_csv(os.path.join(wi_folder, f'edges/{weather_event}.csv'))
+    weatherImpactNodes = pd.read_csv(os.path.join(wi_folder, f'nodes/{weather_event}.csv'))
 
     # Prepare graph structure
     edgeList = []

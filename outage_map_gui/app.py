@@ -5,8 +5,9 @@ import platform  # Used to detect the operating system
 from .import_dss_tab import create_tab1
 from .get_weather_events_tab import create_tab2
 from .format_weather_tab import create_tab3
-from .generate_weather_impact_tab import create_tab4
-from .generate_outage_map_tab import create_tab5
+from .find_extreme_tab import create_tab4
+from .generate_weather_impact_tab import create_tab5
+from .generate_outage_map_tab import create_tab6
 
 def maximize_window(root):
     """Maximizes the window based on the operating system."""
@@ -45,6 +46,7 @@ def main():
     create_tab3(notebook)
     create_tab4(notebook)
     create_tab5(notebook)
+    create_tab6(notebook)
 
     # Pack the notebook to make it visible
     notebook.pack(expand=True, fill='both')

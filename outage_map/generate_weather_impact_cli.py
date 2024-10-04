@@ -71,12 +71,12 @@ def generate_weather_impact(feature_list, input_path, node_feature, edge_feature
         severity_levels[feature] = createLevelsAlt(min_val, max_val, 10)
 
     # Process files for nodes
-    file_names = [f for f in os.listdir(node_directories[0]) if os.path.isfile(os.path.join(node_directories[0], f))]
+    file_names = [f for f in os.listdir(node_directories[0]) 
+                if os.path.isfile(os.path.join(node_directories[0], f))]
     
     for name in file_names:
         # alpha = {feature_name: float(values) for feature_name, values in node_feature}
         alpha = {feature_name: values for feature_name, values in node_feature}
-
 
         # Dynamically read data based on the feature
         data_frames = {}
@@ -121,7 +121,9 @@ def generate_weather_impact(feature_list, input_path, node_feature, edge_feature
         events.to_csv(os.path.join(nodes_output_path, name), index=False)
 
     # Process files for edges
-    edge_file_names = [f for f in os.listdir(edge_directories[0]) if os.path.isfile(os.path.join(edge_directories[0], f))]
+    edge_file_names = [f for f in os.listdir(edge_directories[0]) 
+                   if os.path.isfile(os.path.join(edge_directories[0], f))]
+
     
     for name in edge_file_names:
         # alpha = {feature_name: float(values) for feature_name, values in edge_feature}

@@ -375,7 +375,7 @@ def findWeatherLevel(weather_value,weather_levels):
         if (weather_value >= weather_levels[i]['min']):
             if (weather_value <= weather_levels[i]['max']):
                 # Check if the weather_value falls within the min and max of the current level
-                score = (i+1)*0.1
+                score = (i+1) * 0.1
                 return score
 
 def findFeatureLevel(feature_value,feature_levels):

@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import networkx as nx
 import opendssdirect as dss
-from .util.NetworkFunctions import getElevationByCoords, fixBusName, findNodeNum, getTreeCanopy, findSlopeOfElevation, generateDem, getLandCover
+from .util.NetworkFunctions import getElevationByCoords, fixBusName, findNodeNum, getTreeCanopy, findSlopeOfElevation, generateDem, getLandCover, convertCoverToSeverity
 from .util.ComponentClasses import Bus, Line, Load, Node, Edge, Transformer
 import warnings
 
@@ -90,7 +90,7 @@ def import_dss(input_path, output_path):
     for i, bus in enumerate(BUSES):
         NODES.append(Node(bus.name, i, coords[i], 
                         elevation=elevations[i],
-                        cover=covers[i],
+                        cover=convertCoverToSeverity(covers[i]),
                         vegetation=vegetations[i]))
 
     for line in LINES:

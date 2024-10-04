@@ -74,7 +74,7 @@ def get_features_from_container(feature_container):
         features.append((feature_name, mean_min, mean_max, std_min, std_max))
     return features if len(features) > 0 else None
 
-def run_generate_outage_map(node_feature_container, edge_feature_container, list_folder, wi_folder, status_label, process_button):
+def run_generate_outage_map(node_feature_container, edge_feature_container, list_folder, wi_folder, weather_event, status_label, process_button):
     def process_files():
         process_button.config(state="disabled")
         status_label.config(text="Processing...")
@@ -94,7 +94,7 @@ def run_generate_outage_map(node_feature_container, edge_feature_container, list
 
         try:
             ctx = Context(GENERATE_OUTAGE_MAP)
-            ctx.invoke(generate_outage_map, node_feature=node_features, edge_feature=edge_features, list_folder=list_folder, wi_folder=wi_folder)
+            ctx.invoke(generate_outage_map, node_feature=node_features, edge_feature=edge_features, list_folder=list_folder, wi_folder=wi_folder, weather_event=weather_event)
 
             status_label.config(text="Completed!")
             messagebox.showinfo("Success", "Outage map generated successfully!")
@@ -106,8 +106,8 @@ def run_generate_outage_map(node_feature_container, edge_feature_container, list
 
     threading.Thread(target=process_files).start()
 
-# Create GUI for Tab 5
-def create_tab5(notebook):
+# Create GUI for Tab 6
+def create_tab6(notebook):
     tab5 = tk.Frame(notebook)
     notebook.add(tab5, text='Generate Outage Map')
 
@@ -146,6 +146,12 @@ def create_tab5(notebook):
     wi_folder_button = tk.Button(scrollable_frame, text="Browse", command=lambda: select_directory(wi_folder_entry))
     wi_folder_button.pack(pady=5)
 
+    weather_event_label = tk.Label(scrollable_frame, text="Select Weather Event file that contains the weather impact:")
+    weather_event_label.pack(pady=10)
+
+    weather_event_entry = tk.Entry(scrollable_frame, width=50)
+    weather_event_entry.pack(pady=5)
+
     status_label = tk.Label(scrollable_frame, text="")
     status_label.pack(pady=10)
 
@@ -155,6 +161,7 @@ def create_tab5(notebook):
                                    edge_feature_container,
                                    list_folder_entry.get(),
                                    wi_folder_entry.get(),
+                                   weather_event_entry.get(),
                                    status_label,
                                    process_button
                                ))
