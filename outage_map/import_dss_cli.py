@@ -99,7 +99,7 @@ def import_dss(input_path, output_path):
     for tf in TRANSFORMERS:
         EDGES.append(Edge(tf.name, 0, findNodeNum(tf.bus1, NODES), findNodeNum(tf.bus2, NODES), 1))
 
-    G = nx.MultiDiGraph()
+    G = nx.MultiGraph()
 
     nodeDict = []
 
@@ -122,14 +122,31 @@ def import_dss(input_path, output_path):
             avg_veg = (vegetations[edge.bus1] +  vegetations[edge.bus2]) / 2
             G.add_edge(edge.bus1, edge.bus2, name=edge.name, length=edge.length, slope=findSlopeOfElevation(coords1=coords1, coords2=coords2, dem=dem), vegetation=avg_veg)
 
+    T = nx.dfs_tree(G)
     el = nx.to_pandas_edgelist(G)
+    el1 = nx.to_pandas_edgelist(T)
+
+    for i in range(len(el1)):
+        source, target = el1.iloc[i]["source"], el1.iloc[i]["target"]
+        for j in range(len(el)):
+            original_source, original_target = el.iloc[j]["source"], el.iloc[j]["target"]
+
+            if source == original_source and target == original_target:
+                el1.at[i, "length"] = el.iloc[j]["length"]
+                el1.at[i, "vegetation"] = el.iloc[j]["vegetation"]
+                el1.at[i, "slope"] = el.iloc[j]["slope"]
+            elif source == original_target and target == original_source:
+                el1.at[i, "length"] = el.iloc[j]["length"]
+                el1.at[i, "vegetation"] = el.iloc[j]["vegetation"]
+                el1.at[i, "slope"] = -el.iloc[j]["slope"]
+
     nl = pd.DataFrame(nodeDict)
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
     pd.DataFrame.to_csv(nl, os.path.join(output_path, 'nodeList.csv'))
-    pd.DataFrame.to_csv(el, os.path.join(output_path, 'edgeList.csv'))
+    pd.DataFrame.to_csv(el1, os.path.join(output_path, 'edgeList.csv'))
 
     click.echo(f"nodeList and edgeList saved to {output_path}.")
 
