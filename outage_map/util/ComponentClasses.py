@@ -69,9 +69,10 @@ class Transformer:
 
 # Node Class for Graph Neural Network
 class Node:
-    def __init__(self, name, num, coords, elevation=None, vegetation=None, cover=None, node_type=None, low_tension_bus=None, high_tension_bus=None, flood_zone=None, material=None, original_name=None):
+    def __init__(self, name, num, coords, elevation=None, vegetation=None, cover=None, node_type=None, low_tension_bus=None, high_tension_bus=None, flood_zone=None, material=None, original_name=None, original_index=None):
         
         self.name = name
+        self.original_index = original_index
         self.num = num
         self.coords = coords
         self.type = node_type
@@ -86,19 +87,20 @@ class Node:
 
 # Edge Class for Graph Neural Network
 class Edge:
-    def __init__(self, name, length, bus1, bus2, enabled, vegetation=None, slope=None, conductor=None, original_name=None, location=None, voltage=None):
+    def __init__(self, name, length, source=None, target=None, enabled=None, vegetation=None, slope=None, conductor=None, original_name=None, location=None, voltage=None, num=None):
         
         # Name of Edge
         self.name = name
+        self.num = num
         
         # Length of line 
         self.length = length            # 0 if transformer, else length
 
         # Terminal 1 Connection
-        self.bus1 = bus1
+        self.source = source
         
         # Terminal 2 Connection
-        self.bus2 = bus2
+        self.target = target
 
         # Is the edge enabled
         self.enabled = enabled          # This will be 0 if no and 1 if yes'

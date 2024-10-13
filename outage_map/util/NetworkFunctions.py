@@ -2,13 +2,14 @@ import pygeohydro as gh
 import py3dep
 import numpy as np
 from math import radians, sin, cos, sqrt, atan2, degrees
-from shapely.geometry import LineString
+from pygeohydro import NFHL
 from pyproj import Geod
 import geopandas as gpd
-from shapely.geometry import box
+from shapely.geometry import box, Point as shapely_point
 from datetime import datetime, timedelta
 import math
 from meteostat import Hourly, Point
+import plotly.graph_objects as go
 
 
 def find_node_by_name(connections, target):
@@ -195,6 +196,35 @@ def generateDem(lat, lon):
     dem = py3dep.get_map("DEM", geom, resolution=30, geo_crs=4326)
 
     return dem
+
+def generateFloodZoneBox(coords):
+    nfhl = NFHL("NFHL", "flood hazard zones")
+
+    min_lon = float('inf')
+    max_lon = -float('inf')
+    min_lat = float('inf')
+    max_lat = -float('inf')
+
+    for lon, lat in coords:
+        min_lon = min(min_lon, lon)
+        max_lon = max(max_lon, lon)
+        min_lat = min(min_lat, lat)
+        max_lat = max(max_lat, lat)
+
+    q1 = (min_lon, min_lat)  # Bottom-left
+    q2 = (max_lon, min_lat)  # Bottom-right
+    q3 = (max_lon, max_lat)  # Top-right
+    q4 = (min_lon, max_lat)  # Top-left
+
+    gdf_xs=nfhl.bygeom([q1, q2, q3, q4], geo_crs=4269)
+
+    return gdf_xs
+
+def checkFloodZone(coord, zones):
+    current_point = shapely_point(coord[0], coord[1])
+    for i in range(len(zones)):
+        if zones.iloc[i]['geometry'].contains(current_point):
+            return zones.iloc[i]["FLD_ZONE"]
 
 def findSlopeOfElevation(dem, coords1, coords2):
     lon1, lat1 = coords1
@@ -456,3 +486,89 @@ def convertCoverToSeverity(value):
     # Developed
     else:
         return 2
+    
+def graphOpenStreetView(pos, NODES, EDGES):
+
+    # Prepare lists for nodes and edges
+    node_lat = [coords[1] for coords in pos.values()]
+    node_lon = [coords[0] for coords in pos.values()]
+
+    # Prepare lists for latitudes and longitudes of each type
+    loads_lat = [node.coords[1] for node in NODES if node.type == 'load']
+    loads_lon = [node.coords[0] for node in NODES if node.type == 'load']
+
+    poles_lat = [node.coords[1] for node in NODES if node.type == 'pole']
+    poles_lon = [node.coords[0] for node in NODES if node.type == 'pole']
+
+    transformers_lat = [node.coords[1] for node in NODES if node.type == 'pole_xfmr']
+    transformers_lon = [node.coords[0] for node in NODES if node.type == 'pole_xfmr']
+
+    # Create the figure for Plotly
+    fig = go.Figure()
+
+    # Add load nodes (green)
+    fig.add_trace(go.Scattermapbox(
+        lat=loads_lat,
+        lon=loads_lon,
+        mode='markers',
+        marker=dict(size=10, color='green'),
+        text=[f"Load {node.num}" for node in NODES if node.type == 'load'],
+        hoverinfo='text',
+    ))
+
+    # Add pole nodes (black)
+    fig.add_trace(go.Scattermapbox(
+        lat=poles_lat,
+        lon=poles_lon,
+        mode='markers',
+        marker=dict(size=5, color='black'),
+        text=[f"Pole {node.num}" for node in NODES if node.type == 'pole'],
+        hoverinfo='text',
+    ))
+
+    # Add Substation transformer node (orange)
+    fig.add_trace(go.Scattermapbox(
+        lat=np.array(transformers_lat[0]),
+        lon=np.array(transformers_lon[0]),
+        mode='markers',
+        marker=dict(size=10, color='orange'),
+        text=[f"Substation Transformer {node.num}" for node in NODES if node.type == 'pole_xfmr'],
+        hoverinfo='text',
+    ))
+
+    # Add transformer nodes (red)
+    fig.add_trace(go.Scattermapbox(
+        lat=transformers_lat[1:],
+        lon=transformers_lon[1:],
+        mode='markers',
+        marker=dict(size=10, color='red'),
+        text=[f"Transformer {node.num}" for node in NODES if node.type == 'pole_xfmr'],
+        hoverinfo='text',
+    ))
+
+    # Add edges as lines between the nodes
+    for edge in EDGES:
+        source_coords = pos[edge.source]
+        target_coords = pos[edge.target]
+        
+        fig.add_trace(go.Scattermapbox(
+            lat=[source_coords[1], target_coords[1]],
+            lon=[source_coords[0], target_coords[0]],
+            mode='lines',
+            line=dict(width=2, color='blue'),
+            hoverinfo='none',
+        ))
+
+    # Set up the map layout with OpenStreetMap
+    fig.update_layout(
+        mapbox=dict(
+            style="open-street-map",
+            center=dict(lat=sum(node_lat) / len(node_lat), lon=sum(node_lon) / len(node_lon)),
+            zoom=14  # Adjust the zoom level as needed
+        ),
+        showlegend=False,
+        margin=dict(l=0, r=0, t=0, b=0)
+    )
+
+    # Show the map
+    fig.show()

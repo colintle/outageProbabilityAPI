@@ -1,0 +1,5 @@
+outage_map_gui_app.spec
+Outage_Map_API.egg-info
+cache
+outage_map\__pycache__
+Outage_Map_API.egg-info

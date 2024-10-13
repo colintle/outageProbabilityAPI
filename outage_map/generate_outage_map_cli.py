@@ -111,8 +111,9 @@ def generate_outage_map(node_feature, edge_feature, list_folder, weather_event, 
     edgeList = []
     graph = defaultdict(list)
     for i in range(len(edges)):
+        index = edges.iloc[i]['num']
         edgeList.append((int(edges.iloc[i]["source"]), int(edges.iloc[i]["target"])))
-        graph[int(edges.iloc[i]["source"])].append([int(edges.iloc[i]["target"]), i])
+        graph[int(edges.iloc[i]["source"])].append([int(edges.iloc[i]["target"]), index])
 
     # Initialize directed graph and add nodes and edges
     G = nx.DiGraph()
@@ -120,28 +121,30 @@ def generate_outage_map(node_feature, edge_feature, list_folder, weather_event, 
     G.add_edges_from(sorted(edgeList))
 
     # Calculate probabilities for nodes based on weather impact
-    probNodes = []
+    probNodes = [0] * len(nodes)
     for i in range(len(nodes)):
         currWeatherImpactN = weatherImpactNodes.iloc[[i]]
+        index = nodes.iloc[i]["num"]
         currProb = []
         for j in range(2):
             bounds = {}
             for feature in nodeFeatures:
                 bounds[feature] = eval(currWeatherImpactN[feature][i])[j]
             currProb.append(generateProb(nodes.iloc[[i]], None, nodeFeatures, edgeFeatures, meanRange_nodes, stdRange_nodes, forecastedRange_nodes, bounds, None, numOfBins))
-        probNodes.append(currProb)
+        probNodes[index] = currProb
 
     # Calculate probabilities for edges based on weather impact
-    probEdges = []
+    probEdges = [0] * len(edges)
     for i in range(len(edges)):
         currWeatherImpactE = weatherImpactEdges.iloc[[i]]
+        index = edges.iloc[i]["num"]
         currProb = []
         for j in range(2):
             bounds = {}
             for feature in edgeFeatures:
                 bounds[feature] = eval(currWeatherImpactE[feature][i])[j]
             currProb.append(generateProb(None, edges.iloc[[i]], nodeFeatures, edgeFeatures, meanRange_edges, stdRange_edges, forecastedRange_edges, None, bounds, numOfBins))
-        probEdges.append(currProb)
+        probEdges[index] = currProb
 
     # Calculate combined probabilities for nodes and their parent nodes
     prob = probOfNodeAndParent(probNodes, probEdges, graph)
@@ -150,11 +153,16 @@ def generate_outage_map(node_feature, edge_feature, list_folder, weather_event, 
     meanProb = [(low + high) / 2 for low, high in prob]
 
     # Set positions for nodes based on their coordinates
-    pos = {i: eval(nodes.iloc[[i]]["coords"][i]) for i in range(len(nodes))}
+    pos = {nodes.iloc[i]["num"]: eval(nodes.iloc[[i]]["coords"][i]) for i in range(len(nodes))}
 
-    nodes["Probability"] = meanProb
+    resultProb = []
+
+    for i in range(len(nodes)):
+        index = nodes.iloc[i]["num"]
+        resultProb.append(meanProb[index])
+
+    nodes["Probability"] = resultProb
     nodes.to_csv(os.path.join(list_folder, 'nodeList.csv'), index=False)
-
 
     # Plot the graph with probabilities
     plotTreeWithProb(G, meanProb, "", pos)
