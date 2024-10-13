@@ -31,6 +31,8 @@ def import_dss(input_path, output_path):
 
     dss.Command(f'Redirect {input_path}/Master.dss')
     buses = dss.Circuit.AllBusNames()
+    line_catalog = pd.read_csv('outage_map/util/LineGeometryCatalog.csv')
+    line_catalog['name']=line_catalog['name'].str.upper()
 
     # Initialize empty list for circuit and graph components
     HIGH_TENSION_NODES= []
@@ -217,6 +219,11 @@ def import_dss(input_path, output_path):
                 continue
             
             edge_set.add(edge_name)  
+            dss.LineGeometries.Name(dss.Lines.Geometry())
+            line_conductor = dss.LineGeometries.Conductors()[0]
+            line_conductor=line_conductor.upper()
+            line_location = line_catalog.loc[line_catalog['name'] == line_conductor, 'type'].values[0]
+            line_material = line_catalog.loc[line_catalog['name'] == line_conductor, 'material'].values[0]
 
             coords1 = coords[new_bus1Num]
             coords2 = coords[new_bus2Num]
@@ -228,9 +235,9 @@ def import_dss(input_path, output_path):
                     num = lineCounter,
                     source = new_bus1Num,
                     target = new_bus2Num,
-                    conductor = 'ACSR',
+                    conductor = line_material,
                     original_name = line,
-                    location = 'OH',
+                    location = line_location,
                     voltage =  11, 
                     length = dss.Lines.Length(),
                     vegetation = avg_veg,
@@ -242,9 +249,9 @@ def import_dss(input_path, output_path):
                     num = lineCounter,
                     source = new_bus1Num,
                     target = new_bus2Num,
-                    conductor = 'ACSR',
+                    conductor = line_material,
                     original_name = line,
-                    location = 'OH',
+                    location = line_location,
                     voltage =  11, 
                     length = dss.Lines.Length(),
                     vegetation = avg_veg,
@@ -259,7 +266,7 @@ def import_dss(input_path, output_path):
         'source':edge.source,
         'target':edge.target,
         'original_name': edge.original_name,
-        'conductor': edge.conductor,
+        'material': edge.material,
         'voltage': edge.voltage,
         'location': edge.location,
         'length': edge.length,
@@ -291,7 +298,7 @@ def import_dss(input_path, output_path):
                             source=edge.source,
                             target=edge.target,
                             original_name=edge.original_name,
-                            conductor=edge.conductor,
+                            material=edge.material,
                             voltage=edge.voltage,
                             location=edge.location,
                             length=edge.length,
@@ -333,23 +340,32 @@ def import_dss(input_path, output_path):
     G = nx.from_pandas_edgelist(df_edges,edge_attr=True)
     T = nx.dfs_tree(G, 0)
     pos = {row['num']: row['coords'] for idx, row in df_nodes.iterrows() if row['coords'] is not None}
-    color_map = []
+    color_map_nodes = []
+    color_map_edges = []
     size_map = []
     for node in T.nodes:
         if node== 0:
-            color_map.append('orange')
+            color_map_nodes.append('orange')
             size_map.append(40)
         elif df_nodes.loc[df_nodes['num'] == node, 'node_type'].values[0] == 'pole_xfmr':
-            color_map.append('red')
+            color_map_nodes.append('red')
             size_map.append(30)        
         elif df_nodes.loc[df_nodes['num'] == node, 'node_type'].values[0] == 'load':
-            color_map.append('green')
+            color_map_nodes.append('green')
             size_map.append(30)
         else: 
-            color_map.append('black')
+            color_map_nodes.append('black')
             size_map.append(15)
 
-    T = nx.dfs_tree(G, 0)
+    for u, v in T.edges:
+        edge_attr = G.edges[u, v]
+        if edge_attr['location'] == 'OH':
+            color_map_edges.append('brown')
+        else:
+            color_map_edges.append('grey')        
+    i = i+1
+
+
     el = nx.to_pandas_edgelist(G)
     el1 = nx.to_pandas_edgelist(T)
 
@@ -366,7 +382,7 @@ def import_dss(input_path, output_path):
                         else:
                             el1.at[i, column] = el.iloc[j][column]
 
-    nx.draw_networkx(T, pos=pos,with_labels=False, node_color=color_map,node_size=size_map, font_size=6,arrows=True)
+    nx.draw_networkx(T, pos=pos,with_labels=False, node_color=color_map_nodes,edge_color=color_map_edges,node_size=size_map, font_size=6,arrows=True)
     plt.show()
 
     if not os.path.exists(output_path):

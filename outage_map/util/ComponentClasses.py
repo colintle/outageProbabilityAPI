@@ -87,7 +87,7 @@ class Node:
 
 # Edge Class for Graph Neural Network
 class Edge:
-    def __init__(self, name, length, source=None, target=None, enabled=None, vegetation=None, slope=None, conductor=None, original_name=None, location=None, voltage=None, num=None):
+    def __init__(self, name, length, source=None, target=None, enabled=None, vegetation=None, slope=None, material=None, original_name=None, location=None, voltage=None, num=None):
         
         # Name of Edge
         self.name = name
@@ -109,7 +109,7 @@ class Edge:
 
         self.slope= slope
 
-        self.conductor = conductor
+        self.material = material
         self.original_name = original_name
         self.location = location
         self.voltage = voltage
