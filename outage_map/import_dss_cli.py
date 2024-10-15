@@ -31,7 +31,9 @@ def import_dss(input_path, output_path):
 
     dss.Command(f'Redirect {input_path}/Master.dss')
     buses = dss.Circuit.AllBusNames()
-    line_catalog = pd.read_csv('outage_map/util/LineGeometryCatalog.csv')
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(script_dir, 'util/LineGeometryCatalog.csv')
+    line_catalog = pd.read_csv(csv_path)
     line_catalog['name']=line_catalog['name'].str.upper()
 
     # Initialize empty list for circuit and graph components
@@ -235,7 +237,7 @@ def import_dss(input_path, output_path):
                     num = lineCounter,
                     source = new_bus1Num,
                     target = new_bus2Num,
-                    conductor = line_material,
+                    material = line_material,
                     original_name = line,
                     location = line_location,
                     voltage =  11, 
@@ -249,7 +251,7 @@ def import_dss(input_path, output_path):
                     num = lineCounter,
                     source = new_bus1Num,
                     target = new_bus2Num,
-                    conductor = line_material,
+                    material = line_material,
                     original_name = line,
                     location = line_location,
                     voltage =  11, 
@@ -271,7 +273,9 @@ def import_dss(input_path, output_path):
         'location': edge.location,
         'length': edge.length,
         'vegetation': edge.vegetation,
-        'slope': edge.slope
+        'slope': edge.slope,
+        'material': edge.material,
+        'location': edge.location
     } for edge in EDGES]
 
     G = nx.MultiGraph()
