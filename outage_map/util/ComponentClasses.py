@@ -69,7 +69,7 @@ class Transformer:
 
 # Node Class for Graph Neural Network
 class Node:
-    def __init__(self, name, num, coords, elevation=None, vegetation=None, cover=None, node_type=None, low_tension_bus=None, high_tension_bus=None, flood_zone=None, material=None, original_name=None, original_index=None):
+    def __init__(self, name, num, coords, elevation=None, vegetation=None, cover=None, node_type=None, low_tension_bus=None, high_tension_bus=None, flood_zone=None,flood_zone_num=None, material=None, original_name=None, original_index=None):
         
         self.name = name
         self.original_index = original_index
@@ -80,6 +80,7 @@ class Node:
         self.low_tension_bus = low_tension_bus
         self.high_tension_bus = high_tension_bus
         self.flood_zone = flood_zone
+        self.flood_zone_num = flood_zone_num
         self.material = material
         self.elevation = elevation
         self.vegetation = vegetation

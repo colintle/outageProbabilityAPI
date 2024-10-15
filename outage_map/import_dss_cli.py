@@ -85,7 +85,7 @@ def import_dss(input_path, output_path):
         for j in range(len(LOW_TENSION_NODES)):
             if name_to_match in LOW_TENSION_NODES[j]['name']:
                 LT_index = j
-
+        flood_zone, flood_zone_num = checkFloodZone(coords[HIGH_TENSION_NODES[i]['num']], flood_zones),
         NODES.append(Node(
             name ='pole_xfmr_'+str(i),
             num = node_counter,
@@ -94,7 +94,8 @@ def import_dss(input_path, output_path):
             original_name = 'pole_xfmr',
             low_tension_bus = LOW_TENSION_NODES[LT_index]['name'],
             high_tension_bus = HIGH_TENSION_NODES[i]['name'],
-            flood_zone = checkFloodZone(coords[HIGH_TENSION_NODES[i]['num']], flood_zones),
+            flood_zone = flood_zone,
+            flood_zone_num = flood_zone_num,
             material = 'wood',
             node_type = 'pole_xfmr',
             elevation = elevations[HIGH_TENSION_NODES[i]['num']],
@@ -105,6 +106,7 @@ def import_dss(input_path, output_path):
         node_counter = node_counter + 1                                 
 
     for i in range(len(LOADS)):
+        flood_zone, flood_zone_num = checkFloodZone(coords[LOADS[i]['num']], flood_zones),
         NODES.append(Node(
             name ='load_'+str(i),
             num = node_counter,
@@ -113,7 +115,8 @@ def import_dss(input_path, output_path):
             original_name = LOADS[i]['name'],
             low_tension_bus = None,
             high_tension_bus = None,
-            flood_zone = checkFloodZone(coords[LOADS[i]['num']], flood_zones),
+            flood_zone = flood_zone,
+            flood_zone_num = flood_zone_num,
             material = 'load',
             node_type = 'load',
             elevation = elevations[LOADS[i]['num']],
@@ -124,6 +127,7 @@ def import_dss(input_path, output_path):
         node_counter = node_counter + 1
 
     for i in range(len(HIGH_VOLTAGE_POLES)):
+        flood_zone, flood_zone_num = checkFloodZone(coords[HIGH_VOLTAGE_POLES[i]['num']], flood_zones),
         NODES.append(Node(
             name ='pole_hv_'+str(i),
             num = node_counter,
@@ -132,7 +136,8 @@ def import_dss(input_path, output_path):
             original_name = HIGH_VOLTAGE_POLES[i]['name'],
             low_tension_bus = None,
             high_tension_bus = None,
-            flood_zone = checkFloodZone(coords[HIGH_VOLTAGE_POLES[i]['num']], flood_zones),
+            flood_zone = flood_zone,
+            flood_zone_num = flood_zone_num,
             material = 'wood',
             node_type = 'pole',
             elevation = elevations[HIGH_VOLTAGE_POLES[i]['num']],
@@ -142,6 +147,7 @@ def import_dss(input_path, output_path):
         node_counter = node_counter + 1
 
     for i in range(len(LOW_VOLTAGE_POLES)):
+        flood_zone, flood_zone_num = checkFloodZone(coords[LOW_VOLTAGE_POLES[i]['num']], flood_zones),
         NODES.append(Node(
             name ='pole_lv_'+str(i),              
             num = node_counter,
@@ -150,7 +156,8 @@ def import_dss(input_path, output_path):
             original_name = LOW_VOLTAGE_POLES[i]['name'],
             low_tension_bus = None,
             high_tension_bus = None,
-            flood_zone = checkFloodZone(coords[LOW_VOLTAGE_POLES[i]['num']], flood_zones),
+            flood_zone = flood_zone,
+            flood_zone_num = flood_zone_num,
             material = 'wood',
             node_type = 'pole',
             elevation = elevations[LOW_VOLTAGE_POLES[i]['num']],
@@ -169,6 +176,7 @@ def import_dss(input_path, output_path):
         'low_tension_bus': node.low_tension_bus,
         'high_tension_bus': node.high_tension_bus,
         'flood_zone': node.flood_zone,
+        'flood_zone_num': node.flood_zone_num,
         'material': node.material,
         'node_type': node.type,
         'elevation': node.elevation,
@@ -290,6 +298,7 @@ def import_dss(input_path, output_path):
             low_tension_bus=node.low_tension_bus,
             high_tension_bus=node.high_tension_bus,
             flood_zone=node.flood_zone,
+            flood_zone_num=node.flood_zone_num,
             material=node.material,
             node_type=node.type,
             elevation=node.elevation,

@@ -220,11 +220,33 @@ def generateFloodZoneBox(coords):
 
     return gdf_xs
 
+def convertFloodZoneToNumber(flood_zone):
+    if flood_zone == 'D':
+        return 1
+    elif flood_zone == 'X':
+        return 2
+    elif flood_zone == 'C':
+        return 3
+    elif flood_zone == 'B':
+        return 4
+    elif flood_zone == 'A':
+        return 5
+    elif flood_zone == 'AE':
+        return 6
+    elif flood_zone == 'AH':
+        return 7
+    elif flood_zone == 'AO':
+        return 8
+    elif flood_zone == 'V':
+        return 9
+    elif flood_zone == 'VE':
+        return 10
+
 def checkFloodZone(coord, zones):
     current_point = shapely_point(coord[0], coord[1])
     for i in range(len(zones)):
         if zones.iloc[i]['geometry'].contains(current_point):
-            return zones.iloc[i]["FLD_ZONE"]
+            return zones.iloc[i]["FLD_ZONE"], convertFloodZoneToNumber(zones.iloc[i]["FLD_ZONE"]) 
 
 def findSlopeOfElevation(dem, coords1, coords2):
     lon1, lat1 = coords1
