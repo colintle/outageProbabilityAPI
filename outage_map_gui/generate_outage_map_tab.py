@@ -74,7 +74,7 @@ def get_features_from_container(feature_container):
         features.append((feature_name, mean_min, mean_max, std_min, std_max))
     return features if len(features) > 0 else None
 
-def run_generate_outage_map(node_feature_container, edge_feature_container, list_folder, wi_folder, weather_event, status_label, process_button):
+def run_generate_outage_map(node_feature_container, edge_feature_container, list_folder, wi_folder, weather_event, datasets, status_label, process_button):
     def process_files():
         process_button.config(state="disabled")
         status_label.config(text="Processing...")
@@ -87,14 +87,14 @@ def run_generate_outage_map(node_feature_container, edge_feature_container, list
             process_button.config(state="normal")
             return
 
-        if not os.path.exists(list_folder) or not os.path.exists(wi_folder):
+        if not os.path.exists(list_folder) or not os.path.exists(wi_folder) or not os.path.exists(datasets):
             messagebox.showerror("Error", "Invalid directory paths.")
             process_button.config(state="normal")
             return
 
         try:
             ctx = Context(GENERATE_OUTAGE_MAP)
-            ctx.invoke(generate_outage_map, node_feature=node_features, edge_feature=edge_features, list_folder=list_folder, wi_folder=wi_folder, weather_event=weather_event)
+            ctx.invoke(generate_outage_map, node_feature=node_features, edge_feature=edge_features, list_folder=list_folder, wi_folder=wi_folder, weather_event=weather_event, datasets=datasets)
 
             status_label.config(text="Completed!")
             messagebox.showinfo("Success", "Outage map generated successfully!")
@@ -155,6 +155,15 @@ def create_tab6(notebook):
     status_label = tk.Label(scrollable_frame, text="")
     status_label.pack(pady=10)
 
+    datasets_label = tk.Label(scrollable_frame, text="Select Folder to store datasets.hdf5:")
+    datasets_label.pack(pady=10)
+
+    datasets_entry = tk.Entry(scrollable_frame, width=50)
+    datasets_entry.pack(pady=5)
+
+    datasets_button = tk.Button(scrollable_frame, text="Browse", command=lambda: select_directory(datasets_entry))
+    datasets_button.pack(pady=5)
+
     process_button = tk.Button(scrollable_frame, text="Generate Outage Map",
                                command=lambda: run_generate_outage_map(
                                    node_feature_container,
@@ -162,6 +171,7 @@ def create_tab6(notebook):
                                    list_folder_entry.get(),
                                    wi_folder_entry.get(),
                                    weather_event_entry.get(),
+                                   datasets_entry.get(),
                                    status_label,
                                    process_button
                                ))

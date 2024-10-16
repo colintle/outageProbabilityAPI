@@ -9,7 +9,20 @@ import warnings
 from collections import deque
 warnings.filterwarnings('ignore')
 
-def assign_values_to_ranges(values, levels=10, inv=False):
+weather_features_dict = {
+    'Temperature': 'temp',
+    'Dew Point': 'dwpt',
+    'Relative Humidity': 'rhum',
+    'Precipitation': 'prcp',
+    'Snowfall': 'snow',
+    'Wind Direction': 'wdir',
+    'Wind Speed': 'wspd',
+    'Wind Gust': 'wpgt',
+    'Pressure': 'pres',
+    'Sunshine': 'tsun'
+}
+
+def assign_values_to_ranges(values, levels=10, inv=False, manual_min=None, manual_max=None):
     """
     Assign values to ranges (bins) based on the specified number of bins.
     
@@ -28,6 +41,10 @@ def assign_values_to_ranges(values, levels=10, inv=False):
     else:
         min_val = min(values)
         max_val = max(values)
+    
+    if manual_min and manual_max:
+        min_val = manual_min
+        max_val = manual_max
 
     range_size = (max_val - min_val) / levels
     

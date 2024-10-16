@@ -85,7 +85,7 @@ def import_dss(input_path, output_path):
         for j in range(len(LOW_TENSION_NODES)):
             if name_to_match in LOW_TENSION_NODES[j]['name']:
                 LT_index = j
-        flood_zone, flood_zone_num = checkFloodZone(coords[HIGH_TENSION_NODES[i]['num']], flood_zones),
+        flood_zone, flood_zone_num = checkFloodZone(coords[HIGH_TENSION_NODES[i]['num']], flood_zones)
         NODES.append(Node(
             name ='pole_xfmr_'+str(i),
             num = node_counter,
@@ -106,7 +106,7 @@ def import_dss(input_path, output_path):
         node_counter = node_counter + 1                                 
 
     for i in range(len(LOADS)):
-        flood_zone, flood_zone_num = checkFloodZone(coords[LOADS[i]['num']], flood_zones),
+        flood_zone, flood_zone_num = checkFloodZone(coords[LOADS[i]['num']], flood_zones)
         NODES.append(Node(
             name ='load_'+str(i),
             num = node_counter,
@@ -127,7 +127,7 @@ def import_dss(input_path, output_path):
         node_counter = node_counter + 1
 
     for i in range(len(HIGH_VOLTAGE_POLES)):
-        flood_zone, flood_zone_num = checkFloodZone(coords[HIGH_VOLTAGE_POLES[i]['num']], flood_zones),
+        flood_zone, flood_zone_num = checkFloodZone(coords[HIGH_VOLTAGE_POLES[i]['num']], flood_zones)
         NODES.append(Node(
             name ='pole_hv_'+str(i),
             num = node_counter,
@@ -147,7 +147,7 @@ def import_dss(input_path, output_path):
         node_counter = node_counter + 1
 
     for i in range(len(LOW_VOLTAGE_POLES)):
-        flood_zone, flood_zone_num = checkFloodZone(coords[LOW_VOLTAGE_POLES[i]['num']], flood_zones),
+        flood_zone, flood_zone_num = checkFloodZone(coords[LOW_VOLTAGE_POLES[i]['num']], flood_zones)
         NODES.append(Node(
             name ='pole_lv_'+str(i),              
             num = node_counter,
