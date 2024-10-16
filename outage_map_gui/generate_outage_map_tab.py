@@ -74,7 +74,7 @@ def get_features_from_container(feature_container):
         features.append((feature_name, mean_min, mean_max, std_min, std_max))
     return features if len(features) > 0 else None
 
-def run_generate_outage_map(node_feature_container, edge_feature_container, list_folder, wi_folder, weather_event, datasets, status_label, process_button):
+def run_generate_outage_map(node_feature_container, edge_feature_container, list_folders, datasets, status_label, process_button):
     def process_files():
         process_button.config(state="disabled")
         status_label.config(text="Processing...")
@@ -87,14 +87,14 @@ def run_generate_outage_map(node_feature_container, edge_feature_container, list
             process_button.config(state="normal")
             return
 
-        if not os.path.exists(list_folder) or not os.path.exists(wi_folder) or not os.path.exists(datasets):
+        if not os.path.exists(list_folders) or not os.path.exists(datasets):
             messagebox.showerror("Error", "Invalid directory paths.")
             process_button.config(state="normal")
             return
 
         try:
             ctx = Context(GENERATE_OUTAGE_MAP)
-            ctx.invoke(generate_outage_map, node_feature=node_features, edge_feature=edge_features, list_folder=list_folder, wi_folder=wi_folder, weather_event=weather_event, datasets=datasets)
+            ctx.invoke(generate_outage_map, node_feature=node_features, edge_feature=edge_features, list_folders=list_folders, datasets=datasets)
 
             status_label.config(text="Completed!")
             messagebox.showinfo("Success", "Outage map generated successfully!")
@@ -128,29 +128,14 @@ def create_tab6(notebook):
     add_edge_feature_button = tk.Button(scrollable_frame, text="Add Edge Feature", command=lambda: add_feature_entry(scrollable_frame, edge_feature_container, "Edge"))
     add_edge_feature_button.pack(pady=5)
 
-    list_folder_label = tk.Label(scrollable_frame, text="Select List Folder (contains nodeList.csv and edgeList.csv):")
-    list_folder_label.pack(pady=10)
+    list_folders_label = tk.Label(scrollable_frame, text="Select List Folder where each folder is a distribution network.")
+    list_folders_label.pack(pady=10)
 
-    list_folder_entry = tk.Entry(scrollable_frame, width=50)
-    list_folder_entry.pack(pady=5)
+    list_folders_entry = tk.Entry(scrollable_frame, width=50)
+    list_folders_entry.pack(pady=5)
 
-    list_folder_button = tk.Button(scrollable_frame, text="Browse", command=lambda: select_directory(list_folder_entry))
-    list_folder_button.pack(pady=5)
-
-    wi_folder_label = tk.Label(scrollable_frame, text="Select Weather Impacts Folder (contains 'edges' and 'nodes' folders):")
-    wi_folder_label.pack(pady=10)
-
-    wi_folder_entry = tk.Entry(scrollable_frame, width=50)
-    wi_folder_entry.pack(pady=5)
-
-    wi_folder_button = tk.Button(scrollable_frame, text="Browse", command=lambda: select_directory(wi_folder_entry))
-    wi_folder_button.pack(pady=5)
-
-    weather_event_label = tk.Label(scrollable_frame, text="Select Weather Event file that contains the weather impact:")
-    weather_event_label.pack(pady=10)
-
-    weather_event_entry = tk.Entry(scrollable_frame, width=50)
-    weather_event_entry.pack(pady=5)
+    list_folders_button = tk.Button(scrollable_frame, text="Browse", command=lambda: select_directory(list_folders_entry))
+    list_folders_button.pack(pady=5)
 
     status_label = tk.Label(scrollable_frame, text="")
     status_label.pack(pady=10)
@@ -168,9 +153,7 @@ def create_tab6(notebook):
                                command=lambda: run_generate_outage_map(
                                    node_feature_container,
                                    edge_feature_container,
-                                   list_folder_entry.get(),
-                                   wi_folder_entry.get(),
-                                   weather_event_entry.get(),
+                                   list_folders_entry.get(),
                                    datasets_entry.get(),
                                    status_label,
                                    process_button
