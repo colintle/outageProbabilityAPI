@@ -212,7 +212,7 @@ def generate_outage_map(node_feature, edge_feature, list_folders, datasets):
                         current_weather_feature_time_series.to_hdf(existing_dataset, key=f"case_study_{network}/{component}_{feature}_{index_event}", mode='a')
 
             # Plot the graph with probabilities
-            plotTreeWithProb(G, meanProb, f"Distribution Network {list_folder} {weather_event}", pos)
+            # plotTreeWithProb(G, meanProb, f"Distribution Network {list_folder} {weather_event}", pos)
 
 if __name__ == "__main__":
     GENERATE_OUTAGE_MAP()

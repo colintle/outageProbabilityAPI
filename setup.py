@@ -76,6 +76,7 @@ setup(
         'pyparsing==3.1.2',
         'pyproj==3.6.1',
         'python-dateutil==2.9.0.post0',
+        'tables==3.10.1',
         'pytz==2024.1',
         'pyyaml==6.0.1',
         'rasterio==1.3.10',

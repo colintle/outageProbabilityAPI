@@ -62,9 +62,10 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
         end = datetime.strptime(f"{end_date} {end_time}", "%Y-%m-%d %H%M")
 
         time_difference = end - start
+        skipEvent = False
 
         # Check if the difference is more than 1 hour
-        if time_difference <= timedelta(hours=1):
+        if time_difference <= timedelta(hours=3):
             continue
         
         # Initialize Node Event Lists for each feature
@@ -79,14 +80,20 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
             
             # Query metrostats for Weather Data
             timeframe = getWeatherByCoords(long, lat, start, end)
+            if max(timeframe["wspd"]) < 40:
+                skipEvent = True
+                break
             
             # Append the data for each selected feature
             for feature in features:
                     event_data[feature].append(timeframe[feature])
-
+        
+        if skipEvent:
+            continue
         # Convert Lists to dataframes and save to corresponding directories
         for feature in features:
             events_df = pd.DataFrame(event_data.get(feature))
+            events_df.fillna(events_df.mean(), inplace=True)
             events_df.reset_index(drop=True, inplace=True)
             events_df.to_csv(os.path.join(node_dirs[feature], f'weatherEvent{j+1}.csv'), index=False)
 
