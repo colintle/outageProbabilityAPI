@@ -94,6 +94,7 @@ def format_weather(events_file, nodelist, edgelist, output_path, features):
         for feature in features:
             events_df = pd.DataFrame(event_data.get(feature))
             events_df.fillna(events_df.mean(), inplace=True)
+            events_df.fillna(0, inplace=True)
             events_df.reset_index(drop=True, inplace=True)
             events_df.to_csv(os.path.join(node_dirs[feature], f'weatherEvent{j+1}.csv'), index=False)
 

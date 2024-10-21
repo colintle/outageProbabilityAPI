@@ -199,6 +199,20 @@ def generate_outage_map(node_feature, edge_feature, list_folders, datasets):
                 resultProb.append(meanProb[index])
 
             nodes["Probability"] = resultProb
+
+            resultUnmodifiedEdges, resultUnmodifiedNodes= [], []
+
+            for i in range(len(probNodes)):
+                index = nodes.iloc[i]["num"]
+                resultUnmodifiedNodes.append((probNodes[index][0] + probNodes[index][1]) / 2)
+
+            for i in range(len(probEdges)):
+                index = edges.iloc[i]["num"]
+                resultUnmodifiedEdges.append((probEdges[index][0] + probEdges[index][1]) / 2)
+
+            nodes["Unmodified Probability"] = resultUnmodifiedNodes
+            edges["Unmodified Probability"] = resultUnmodifiedEdges
+
             # nodes.to_csv(os.path.join(list_folder, 'nodeList.csv'), index=False)
 
             nodes.to_hdf(existing_dataset, key=f"case_study_{network}/node_features_{index_event}", mode='a')
